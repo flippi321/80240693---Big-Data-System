@@ -1,0 +1,30 @@
+Edge-Cut Partitioning:
+Partition 0
+1
+2
+1
+1
+Partition 1
+2
+5
+4
+6
+Partition 2
+2
+4
+3
+3
+
+Vertex-Cut Partitioning:
+Partition 0
+1
+2
+1
+Partition 1
+1
+3
+2
+Partition 2
+3
+3
+2
