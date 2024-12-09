@@ -29,16 +29,13 @@ int main(int argc, char **argv) {
     output(c, x, y, n) = dilated_conv(c, x, y, n);
 
     // Scheduling
-    output.tile(c, x, c_out, x_out, c_in, x_in, 64, 4)  // Tile across channels and spatial x
-          .vectorize(c_in)                              // Vectorize within tiles
-          .vectorize(x_in)                              // Vectorize within spatial tiles
-          .fuse(c_out, x_out, tile_idx)                 // Fuse outer tile loops for parallelism
-          .parallel(tile_idx)                           // Parallelize tile traversal
-          .parallel(y)                                  // Parallelize over spatial y
-          .parallel(n);                                 // Parallelize over batch dimension
-
-    // Uncomment for debugging the loop nest
-    output.print_loop_nest();
+    output.tile(c, x, c_out, x_out, c_in, x_in, 64, 4)  
+          .vectorize(c_in)                              
+          .vectorize(x_in)                              
+          .fuse(c_out, x_out, tile_idx)                 
+          .parallel(tile_idx)                          
+          .parallel(y)                                  
+          .parallel(n);                                 
 
     // Create and initialize input buffers
     Buffer<float, 4> in(CI, W + (KW - 1) * (dilation + 1), H + (KH - 1) * (dilation + 1), N);
@@ -52,10 +49,11 @@ int main(int argc, char **argv) {
     filter.set(fil);
 
     // jit compile and warm-up
-    dilated_conv.realize(output_halide);
+    output.realize(output_halide);
     // NOTE: uncomment next line if time is unstable
     // double t_halide = benchmark(10, 10, [&]() { dilated_conv.realize(output_halide); });
-    double t_halide = benchmark(1, 1, [&]() { dilated_conv.realize(output_halide); });
+    double t_halide = benchmark(1, 1, [&]()
+                                { output.realize(output_halide); });
 
     Buffer<float, 4> output_ref(CO, W, H, N);
     // create and execute a dilated conv primitive using oneDNN
